@@ -1,6 +1,6 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useTransition } from "@remix-run/react";
 import * as React from "react";
 
 import { createNote, createSummary } from "~/models/note.server";
@@ -37,6 +37,7 @@ export default function NewNotePage() {
   const actionData = useActionData<typeof action>();
   const titleRef = React.useRef<HTMLInputElement>(null);
   const bodyRef = React.useRef<HTMLTextAreaElement>(null);
+  const transition = useTransition();
 
   React.useEffect(() => {
     if (actionData?.errors?.title) {
@@ -56,6 +57,11 @@ export default function NewNotePage() {
         width: "100%",
       }}
     >
+           <fieldset
+                disabled={transition.state === "submitting"}
+                >
+
+                </fieldset>
       <div>
         <label className="flex w-full flex-col gap-1">
           <span>Title: </span>
@@ -102,7 +108,9 @@ export default function NewNotePage() {
           type="submit"
           className="rounded bg-blue-500 py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400"
         >
-          Save
+           {transition.state === "submitting"
+                    ? "Creating Summary..."
+                    : "Create Summary"}
         </button>
       </div>
     </Form>
