@@ -3,7 +3,7 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import * as React from "react";
 
-import { createNote } from "~/models/note.server";
+import { createNote, createSummary } from "~/models/note.server";
 import { requireUserId } from "~/session.server";
 
 export async function action({ request }: ActionArgs) {
@@ -11,7 +11,7 @@ export async function action({ request }: ActionArgs) {
 
   const formData = await request.formData();
   const title = formData.get("title");
-  const body = formData.get("body");
+  const inputdata = formData.get("body");
 
   if (typeof title !== "string" || title.length === 0) {
     return json(
@@ -20,13 +20,14 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  if (typeof body !== "string" || body.length === 0) {
+  if (typeof inputdata !== "string" || inputdata.length === 0) {
     return json(
       { errors: { title: null, body: "Body is required" } },
       { status: 400 }
     );
   }
-
+  const summaryjson = await createSummary(inputdata)
+  const body = summaryjson.summary
   const note = await createNote({ title, body, userId });
 
   return redirect(`/notes/${note.id}`);
